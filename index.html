@@ -3,35 +3,323 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>layanh.github.io</title>
+<title>layanh — công cụ tự động hoá và tiện ích trình duyệt</title>
+<meta name="description" content="Portfolio của layanh: sáu dự án cá nhân về tự động hoá xử lý tài liệu, tiện ích Chrome Manifest V3 và công cụ desktop Python. Tất cả chạy cục bộ, không máy chủ trung gian.">
 <style>
-  :root { color-scheme: light dark; }
+  :root {
+    --bg: #0b0d12;
+    --bg-soft: #11141b;
+    --card: #151922;
+    --line: #232834;
+    --line-soft: #1b2029;
+    --fg: #dfe3ea;
+    --fg-dim: #9aa3b2;
+    --fg-mute: #6f7787;
+    --accent: #7ee0a8;
+    --accent-ink: #06210f;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #fbfcfd; --bg-soft: #f4f6f8; --card: #ffffff; --line: #e2e6eb;
+      --line-soft: #edf0f4; --fg: #16191f; --fg-dim: #4c5563; --fg-mute: #79828f;
+      --accent: #1f7a45; --accent-ink: #ffffff;
+    }
+  }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
-    margin: 0; min-height: 100vh; display: grid; place-items: center;
-    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    background: #0f1115; color: #e6e8ec;
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.7 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-  .card {
-    max-width: 34rem; padding: 2.5rem 2rem; text-align: center;
-    border: 1px solid #262b36; border-radius: 14px; background: #161a22;
+  a { color: inherit; }
+  .wrap { max-width: 62rem; margin: 0 auto; padding: 0 1.5rem; }
+
+  header.top {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line-soft);
   }
-  h1 { margin: 0 0 .4rem; font-size: 1.6rem; letter-spacing: -.02em; }
-  .host {
-    display: inline-block; margin: .9rem 0 1.2rem; padding: .35rem .8rem;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1rem;
-    color: #7ee0a8; background: #10231a; border: 1px solid #1f4d33; border-radius: 999px;
+  .toprow { display: flex; align-items: center; gap: 1.25rem; height: 3.5rem; }
+  .brand { font-family: var(--mono); font-weight: 600; letter-spacing: -.02em; text-decoration: none; }
+  .brand span { color: var(--fg-mute); font-weight: 400; }
+  nav.links { margin-left: auto; display: flex; gap: 1.25rem; font-size: .9rem; }
+  nav.links a { color: var(--fg-dim); text-decoration: none; }
+  nav.links a:hover { color: var(--fg); }
+  @media (max-width: 640px) { nav.links { display: none; } }
+
+  .hero { padding: 5rem 0 3.5rem; }
+  .kicker {
+    display: inline-block; font-family: var(--mono); font-size: .78rem;
+    color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+    padding: .25rem .6rem; border-radius: 999px; margin-bottom: 1.4rem;
   }
-  p { margin: .5rem 0; color: #a8b0bd; }
-  .note { font-size: .85rem; color: #6f7783; }
+  h1 { margin: 0 0 1.1rem; font-size: clamp(2rem, 5vw, 3rem); line-height: 1.15; letter-spacing: -.03em; font-weight: 650; }
+  .lede { font-size: 1.1rem; color: var(--fg-dim); max-width: 42rem; margin: 0; }
+  .lede strong { color: var(--fg); font-weight: 600; }
+
+  section { padding: 3rem 0; border-top: 1px solid var(--line-soft); }
+  h2 { margin: 0 0 .4rem; font-size: 1.45rem; letter-spacing: -.02em; }
+  .sub { color: var(--fg-mute); margin: 0 0 2rem; font-size: .95rem; max-width: 44rem; }
+
+  .principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+  .principle { background: var(--bg-soft); border: 1px solid var(--line-soft); border-radius: 12px; padding: 1.15rem 1.2rem; }
+  .principle h3 { margin: 0 0 .45rem; font-size: .98rem; }
+  .principle p { margin: 0; font-size: .9rem; color: var(--fg-dim); }
+
+  .project {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 1.5rem; margin-bottom: 1.1rem;
+  }
+  .phead { display: flex; flex-wrap: wrap; align-items: baseline; gap: .6rem; margin-bottom: .2rem; }
+  .phead h3 { margin: 0; font-size: 1.18rem; letter-spacing: -.02em; }
+  .ver { font-family: var(--mono); font-size: .76rem; color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 5px; padding: .1rem .4rem; }
+  .kind { font-size: .82rem; color: var(--fg-mute); margin-left: auto; }
+  .psum { margin: .5rem 0 1rem; color: var(--fg-dim); font-size: .97rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: 1rem; }
+  .tag { font-family: var(--mono); font-size: .75rem; color: var(--fg-dim); background: var(--bg-soft); border: 1px solid var(--line-soft); border-radius: 5px; padding: .15rem .45rem; }
+
+  details.tech { border-top: 1px solid var(--line-soft); padding-top: .85rem; }
+  details.tech summary { cursor: pointer; font-size: .88rem; color: var(--fg-mute); list-style: none; }
+  details.tech summary::-webkit-details-marker { display: none; }
+  details.tech summary::before { content: "+ "; font-family: var(--mono); color: var(--accent); }
+  details.tech[open] summary::before { content: "− "; }
+  details.tech ul { margin: .8rem 0 0; padding-left: 1.15rem; font-size: .91rem; color: var(--fg-dim); }
+  details.tech li { margin-bottom: .5rem; }
+  details.tech code { font-family: var(--mono); font-size: .86em; background: var(--bg-soft); border: 1px solid var(--line-soft); border-radius: 4px; padding: .05rem .3rem; }
+  .status { font-size: .84rem; color: var(--fg-mute); margin-top: .9rem; padding-top: .7rem; border-top: 1px dashed var(--line-soft); }
+
+  .stackgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .9rem; }
+  .stackcell { border: 1px solid var(--line-soft); border-radius: 10px; padding: .9rem 1rem; background: var(--bg-soft); }
+  .stackcell b { display: block; font-size: .8rem; color: var(--fg-mute); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; margin-bottom: .35rem; }
+  .stackcell div { font-size: .92rem; }
+
+  footer { padding: 2.5rem 0 3rem; border-top: 1px solid var(--line-soft); color: var(--fg-mute); font-size: .9rem; }
+  footer .row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+  footer a { color: var(--fg); text-decoration: none; border-bottom: 1px solid var(--line); }
+  footer a:hover { border-color: var(--accent); color: var(--accent); }
 </style>
 </head>
 <body>
-  <main class="card">
-    <h1>Trang này đã hoạt động</h1>
-    <div class="host">layanh.github.io</div>
-    <p>Đây là trang GitHub Pages của bạn, đang chạy trên giao thức HTTPS với chứng chỉ miễn phí.</p>
-    <p class="note">Nội dung chỉ là trang chờ (placeholder). Thay thế <code>index.html</code> bằng trang thật của bạn để ghi đè lên.</p>
-  </main>
+
+<header class="top">
+  <div class="wrap toprow">
+    <a class="brand" href="#top">layanh<span>.github.io</span></a>
+    <nav class="links">
+      <a href="#du-an">Dự án</a>
+      <a href="#nguyen-tac">Nguyên tắc</a>
+      <a href="#cong-nghe">Công nghệ</a>
+      <a href="#lien-he">Liên hệ</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top" class="wrap">
+
+  <div class="hero">
+    <span class="kicker">Tự động hoá tài liệu · Tiện ích trình duyệt · Công cụ desktop</span>
+    <h1>Tôi viết công cụ nhỏ để giết những việc lặp lại.</h1>
+    <p class="lede">
+      Sáu dự án dưới đây đều sinh ra từ một vấn đề rất cụ thể: xử lý hàng trăm trang tài liệu mỗi ngày,
+      và không muốn gửi file của mình cho máy chủ của ai. Nên tôi làm công cụ
+      <strong>chạy hoàn toàn trên máy</strong> — tiện ích trình duyệt, ứng dụng desktop, và một vài thứ chạy nền trên Google Sheets.
+    </p>
+  </div>
+
+  <section id="nguyen-tac">
+    <h2>Nguyên tắc làm nghề</h2>
+    <p class="sub">Bốn quy tắc tôi giữ xuyên suốt cả sáu dự án, không phải khẩu hiệu.</p>
+    <div class="principles">
+      <div class="principle">
+        <h3>Không máy chủ trung gian</h3>
+        <p>PDF được đọc, render, cắt và ghép ngay trong tab bằng <code>pdf.js</code> và <code>pdf-lib</code>. File không rời khỏi máy. Không có backend, nên không có gì để rò rỉ.</p>
+      </div>
+      <div class="principle">
+        <h3>Không khoá API, không phí hàng tháng</h3>
+        <p>Thay vì đòi người dùng tự mua API key, tôi điều khiển đúng trang web AI mà họ đã đăng nhập. Không tốn phí, không phụ thuộc một model cụ thể nào.</p>
+      </div>
+      <div class="principle">
+        <h3>Cài bằng Load unpacked, không build</h3>
+        <p>Mọi thư viện đều được vendor sẵn trong repo để chạy offline. Tải về, trỏ vào <code>manifest.json</code>, dùng được ngay — không <code>npm install</code>, không bước trung gian.</p>
+      </div>
+      <div class="principle">
+        <h3>Tự kiểm tra trước khi báo xong</h3>
+        <p>Công cụ nào cũng có chế độ tự kiểm in bảng <code>[OK]/[!!]</code> từng hạng mục. Chạy một lần là biết cái gì hỏng, thay vì đoán.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="du-an">
+    <h2>Dự án</h2>
+    <p class="sub">Sáu công cụ đang dùng thật hằng ngày. Bấm vào từng dòng để xem chi tiết kỹ thuật.</p>
+
+    <article class="project">
+      <div class="phead">
+        <h3>PDF Studio AI</h3>
+        <span class="ver">v1.7.2</span>
+        <span class="kind">Tiện ích Chrome · MV3 · ~6.900 dòng</span>
+      </div>
+      <p class="psum">Nối nhiều file PDF, tách thành nhiều file với tên tự đặt, trích xuất nội dung, OCR trang scan, và hỏi đáp trực tiếp với tài liệu — tất cả trong trình duyệt.</p>
+      <div class="meta">
+        <span class="tag">JavaScript</span><span class="tag">pdf.js</span><span class="tag">pdf-lib</span>
+        <span class="tag">JSZip</span><span class="tag">Side Panel API</span><span class="tag">OpenAI-compatible</span>
+      </div>
+      <details class="tech">
+        <summary>Chi tiết kỹ thuật</summary>
+        <ul>
+          <li><strong>Xử lý cục bộ hoàn toàn.</strong> <code>pdf.min.js</code> + <code>pdf.worker.min.js</code> render và trích chữ, <code>pdf-lib</code> ghép và cắt trang, <code>JSZip</code> đóng gói kết quả nhiều file. Vendor sẵn trong <code>vendor/</code>.</li>
+          <li><strong>Tầng AI tách rời khỏi model.</strong> Một adapter duy nhất nói chuyện với endpoint tương thích OpenAI, nên đổi giữa Z.ai, Gemini, Claude, DeepSeek, Groq, OpenRouter hay Ollama và LM Studio chạy cục bộ chỉ là đổi cấu hình, không đổi code.</li>
+          <li><strong>Ba bề mặt giao diện từ một codebase:</strong> popup 600px cho thao tác nhanh, Side Panel để vừa đọc tài liệu vừa làm việc, và tab riêng cho file lớn nhiều trang — vì hộp thoại chọn file làm popup tự đóng.</li>
+          <li><strong>Có test thật:</strong> bộ <code>tests/</code> gồm <code>test.js</code>, <code>e2e.js</code> và <code>extension-e2e.js</code> chạy toàn bộ luồng nối–tách–trích xuất trên tiện ích đã nạp.</li>
+        </ul>
+      </details>
+      <p class="status">Trạng thái: dùng hằng ngày, đang ở bản 1.7.2.</p>
+    </article>
+
+    <article class="project">
+      <div class="phead">
+        <h3>Auto Split WO</h3>
+        <span class="ver">v2.1.2</span>
+        <span class="kind">Ứng dụng desktop Python · ~5.900 dòng</span>
+      </div>
+      <p class="psum">Tách và nối hồ sơ PDF theo nhận diện <em>giấy màu / giấy trắng</em> đếm theo tỷ lệ điểm ảnh, đọc mã Work Order trên từng trang rồi cắt đúng theo mã đó.</p>
+      <div class="meta">
+        <span class="tag">Python 3.12</span><span class="tag">Tkinter</span><span class="tag">pypdf</span>
+        <span class="tag">Pillow</span><span class="tag">PyInstaller</span><span class="tag">ctypes</span>
+      </div>
+      <details class="tech">
+        <summary>Chi tiết kỹ thuật</summary>
+        <ul>
+          <li><strong>Phát hiện chuyển lô bằng màu, không bằng OCR.</strong> Mỗi trang được render rồi đếm tỷ lệ điểm ảnh theo nhóm màu giấy, nên xác định ranh giới lô nhanh và ổn định hơn việc đọc chữ trên bản scan xấu.</li>
+          <li><strong>Trợ lý AI dùng phiên đăng nhập sẵn có.</strong> Bản 2.1.2 mở <code>gemini.google.com/app</code> trong cửa sổ Chrome/Edge riêng bằng chính hồ sơ đang đăng nhập: không API key, không nhập lại mật khẩu, không gắn đời dự án vào một model. Ứng dụng tự nhận bảng kết quả từ clipboard khi bật chế độ tự động.</li>
+          <li><strong>Kiến trúc tách lớp:</strong> <code>core.py</code> cho logic, <code>ui/</code> chia page (split, merge, ai, settings), <code>cli.py</code> cho scripting, <code>tools/</code> và <code>tests/</code> riêng.</li>
+          <li><strong>Đóng gói .exe</strong> bằng <code>build_exe.bat</code> / <code>build_exe.ps1</code>, kèm tài liệu hướng dẫn ba định dạng (PDF, Word, Markdown) trong <code>docs/</code>.</li>
+        </ul>
+      </details>
+      <p class="status">Trạng thái: công cụ chính cho việc xử lý hồ sơ, có người dùng thật trong văn phòng.</p>
+    </article>
+
+    <article class="project">
+      <div class="phead">
+        <h3>Cắt Ảnh &amp; Chụp Cuộn</h3>
+        <span class="kind">Ứng dụng desktop Python · ~3.400 dòng</span>
+      </div>
+      <p class="psum">Một cửa sổ, hai nút, phần còn lại là phím tắt toàn cục: chụp màn hình, cắt vùng, chú thích, và chụp <em>trang web đang cuộn</em> rồi tự ghép thành một ảnh dài duy nhất.</p>
+      <div class="meta">
+        <span class="tag">Python</span><span class="tag">mss</span><span class="tag">numpy</span>
+        <span class="tag">Pillow</span><span class="tag">win32 hotkey</span>
+      </div>
+      <details class="tech">
+        <summary>Chi tiết kỹ thuật</summary>
+        <ul>
+          <li><strong>Ghép ảnh cuộn bằng so khớp overlap.</strong> <code>src/scrollshot.py</code> bắt từng khung, <code>src/stitch.py</code> dùng numpy tìm vùng trùng lặp giữa hai khung liên tiếp rồi chỉ ghép phần mới — không cần extension, không cần bật cổng debug trình duyệt.</li>
+          <li><strong>Không kén trình duyệt:</strong> vì chỉ nhìn màn hình, nó chạy được với Chrome, Edge, Cốc Cốc, Brave và Firefox như nhau.</li>
+          <li><strong>Phím tắt toàn cục qua <code>ctypes</code></strong> đăng ký Win32 hotkey, kèm <code>ctypes.wintypes</code> để xử lý con trỏ và cửa sổ.</li>
+          <li><strong>Tự kiểm tra:</strong> <code>python run.py --selftest</code> in bảng <code>[OK]/[!!]</code> cho từng hạng mục (dự án này sinh ra quy tắc "một lần chạy là phải tự báo cáo được tình trạng").</li>
+        </ul>
+      </details>
+      <p class="status">Trạng thái: ổn định, dùng hằng ngày để tạo tài liệu hướng dẫn.</p>
+    </article>
+
+    <article class="project">
+      <div class="phead">
+        <h3>Auto Split PDF by WO</h3>
+        <span class="ver">v2.0.0 / 2.2</span>
+        <span class="kind">Tiện ích Chrome · MV3 · ~1.900 dòng</span>
+      </div>
+      <p class="psum">Ba bản của cùng một ý tưởng chạy ngay trong trình duyệt: tự phát hiện trang đổi màu giấy để chia lô, đọc mã Work Order, tách thành từng file riêng.</p>
+      <div class="meta">
+        <span class="tag">JavaScript</span><span class="tag">pdf.js</span><span class="tag">pdf-lib</span>
+        <span class="tag">Gemini 3.8 Flash</span>
+      </div>
+      <details class="tech">
+        <summary>Chi tiết kỹ thuật</summary>
+        <ul>
+          <li><code>classic/</code> (Turbo 10x, v2.0.0) tập trung tối ưu tốc độ cho PDF scan — đây là bản ra đời trước, chứng minh ý tưởng chạy được mà không cần AI.</li>
+          <li><code>promax/</code> (v1.0.0) thêm bước dò mã Work Order có hỗ trợ AI khi nhận diện màu giấy bí chỗ.</li>
+          <li><code>wo-gemini/</code> (v2.2) gọi Gemini 3.8 Flash đọc mã WO, và rơi lại logic màu thuần khi AI trả kết quả không tin cậy được.</li>
+          <li><strong>Hướng phát triển ba nhánh song song</strong> để so sánh chi phí thật của việc nhét LLM vào một bài toán thị giác: khi nào tăng độ chính xác, khi nào chỉ thêm độ trễ và phụ thuộc.</li>
+          <li><code>classic/download-libs.sh</code> tải lại <code>pdf.min.js</code>, <code>pdf.worker.min.js</code>, <code>pdf-lib.min.js</code> khi cần nâng cấp.</li>
+        </ul>
+      </details>
+      <p class="status">Trạng thái: ba bản đều dùng được; <code>wo-gemini</code> là bản đang tiến hoá.</p>
+    </article>
+
+    <article class="project">
+      <div class="phead">
+        <h3>Dịch Màn Hình — Screen Translator VI</h3>
+        <span class="ver">v1.1.0</span>
+        <span class="kind">Tiện ích Chrome · MV3 · ~1.300 dòng</span>
+      </div>
+      <p class="psum">Dịch toàn bộ trang web sang tiếng Việt, với chế độ đặc biệt cho tiếng Trung hiển thị ba dòng: chữ Hán, pinyin có dấu thanh, rồi nghĩa tiếng Việt.</p>
+      <div class="meta">
+        <span class="tag">JavaScript</span><span class="tag">MutationObserver</span>
+        <span class="tag">chrome.storage</span><span class="tag">service worker</span>
+      </div>
+      <details class="tech">
+        <summary>Chi tiết kỹ thuật</summary>
+        <ul>
+          <li><strong>Không dịch vòng tiếng Việt.</strong> Nhận diện văn bản đã là tiếng Việt (có dấu hoặc không dấu) và giữ nguyên — tránh lãng phí request và tránh bị máy dịch "viết lại" câu đã đúng.</li>
+          <li><strong>Không phá nội dung kỹ thuật:</strong> bỏ qua <code>pre</code>, <code>code</code>, <code>kbd</code>, ô nhập liệu, vùng <code>contenteditable</code> và khối đánh dấu <code>notranslate</code>.</li>
+          <li><strong>Theo dõi nội dung động</strong> bằng MutationObserver cho SPA, AJAX và cuộn vô hạn; bật/tắt dịch tự động theo từng domain lưu vĩnh viễn.</li>
+          <li><strong>Bộ nhớ đệm theo câu</strong> để một câu không bao giờ bị dịch lần thứ hai.</li>
+        </ul>
+      </details>
+      <p class="status">Trạng thái: dùng hằng ngày để đọc tài liệu tiếng Trung.</p>
+    </article>
+
+    <article class="project">
+      <div class="phead">
+        <h3>Voucher Link Checker</h3>
+        <span class="ver">v1.3.0</span>
+        <span class="kind">Chrome MV3 + Google Apps Script · ~1.500 dòng</span>
+      </div>
+      <p class="psum">Mở lần lượt một danh sách link ưu đãi, chờ trang hiển thị rồi dò các mẫu thông báo như "Ưu đãi không hợp lệ", "Mã đã được sử dụng", và báo lại link nào còn sống.</p>
+      <div class="meta">
+        <span class="tag">JavaScript</span><span class="tag">Apps Script</span>
+        <span class="tag">Google Sheets</span><span class="tag">time-driven trigger</span>
+      </div>
+      <details class="tech">
+        <summary>Chi tiết kỹ thuật</summary>
+        <ul>
+          <li><strong>Hai cách chạy cho cùng một logic:</strong> bản tiện ích Chrome cho kết quả ngay trên máy, và bản Apps Script nằm trong Google Sheets để chạy nền mỗi phút — <em>máy tính tắt vẫn chạy</em>, xem kết quả từ điện thoại.</li>
+          <li><strong>Chờ trạng thái, không chờ thời gian:</strong> dò selector cho tới khi nội dung động xuất hiện rồi mới kết luận, vì trang render lệch nhau rất nhiều.</li>
+          <li>Từ khoá báo hỏng đặt ở sheet <code>CauHinh</code>, không hard-code, nên thêm mẫu thông báo mới không phải sửa code.</li>
+          <li>Bài học chính: ưu đãi quảng cáo lan truyền phần lớn đã hết hạn — công cụ này sinh ra để chứng minh điều đó một cách có hệ thống.</li>
+        </ul>
+      </details>
+      <p class="status">Trạng thái: bản Chrome v1.3.0 và bản Sheets cùng tiến hoá.</p>
+    </article>
+  </section>
+
+  <section id="cong-nghe">
+    <h2>Công nghệ dùng thật</h2>
+    <p class="sub">Chỉ liệt kê những thứ đã ship trong sáu dự án trên, không liệt kê cái tôi mới đọc qua.</p>
+    <div class="stackgrid">
+      <div class="stackcell"><b>Trình duyệt</b><div>Chrome Manifest V3, service worker, Side Panel API, content script, MutationObserver</div></div>
+      <div class="stackcell"><b>Tài liệu</b><div>pdf.js, pdf-lib, JSZip, OCR trang scan, PyPDF2 / pypdf, Pillow</div></div>
+      <div class="stackcell"><b>Python</b><div>Tkinter, mss, numpy, ctypes / Win32 hotkey, PyInstaller, Python 3.12</div></div>
+      <div class="stackcell"><b>AI</b><div>Endpoint tương thích OpenAI, Gemini, Claude, DeepSeek, Groq, OpenRouter, Ollama, LM Studio</div></div>
+      <div class="stackcell"><b>Nền gọn</b><div>Google Apps Script, Sheets triggers, GitHub Pages</div></div>
+      <div class="stackcell"><b>Kiểm thử</b><div>Tự kiểm <code>[OK]/[!!]</code>, e2e test tiện ích đã nạp, test HTML chạy trong trình duyệt</div></div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="lien-he">
+  <div class="wrap row">
+    <div>Gặp vấn đề với công cụ nào ở trên, hoặc muốn trao đổi về tự động hoá tài liệu: cứ liên hệ.</div>
+    <div style="margin-left:auto">
+      <a href="https://github.com/layanh" rel="me">github.com/layanh</a>
+      &nbsp;·&nbsp;
+      <span style="font-family:var(--mono)">layanh.github.io</span>
+    </div>
+  </div>
+</footer>
+
 </body>
 </html>
